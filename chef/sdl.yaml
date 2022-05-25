@@ -1,0 +1,81 @@
+project: 
+  summary: Open source window manager with complimentary apps
+  description: |
+    Open source window manager with complimentary apps. The window manager provides a window manager protocol that anyone would be able to implement, and
+    it allows for a very flexible system. Vioarr comes with a C++ application framework, which can be useful as a quick start for new applications
+  author: Philip Meulengracht
+  email: the_meulengracht@hotmail.com
+  version: 1.0.0
+  license: GPLv3
+  homepage: https://github.com/Meulengracht/vioarr
+
+ingredients:
+- name: vali/clang-cc
+  platform: host
+  arch: host
+  channel: devel
+- name: vali/sdk-c
+  channel: devel
+- name: vali/sdk-cpp
+  channel: devel
+- name: vali/libzip
+  channel: devel
+- name: vali/libgracht
+  channel: devel
+- name: vali/libfreetype
+  channel: devel
+- name: vali/mesa
+  channel: devel
+- name: vali/zlib
+  channel: devel
+- name: vali/libpng
+  channel: devel
+- name: vali/glm
+  channel: devel
+
+recipes:
+  - name: vioarr
+    path: /
+    toolchain: vali/clang-cc
+    steps:
+    - name: config
+      type: generate
+      system: cmake
+      arguments:
+        - -G
+        - '"Unix Makefiles"'
+        - -DCMAKE_TOOLCHAIN_FILE=${{ PROJECT_PATH }}/chef/Vali.cmake
+      env:
+        CROSS: ${{ TOOLCHAIN_PREFIX }}/usr/local
+        VALI_ARCH: ${{ CHEF_TARGET_ARCHITECTURE }}
+        VALI_SDK_PATH: ${{ INGREDIENTS_PREFIX }}
+    - name: build
+      type: build
+      depends: [config]
+      system: make
+      env:
+        VALI_SDK_PATH: ${{ INGREDIENTS_PREFIX }}
+
+packs:
+- name: libasgaard
+  type: ingredient
+  filters:
+    - bin/*.dll
+    - include
+    - lib
+    - share
+- name: vioarr
+  type: application
+  filters:
+    - bin
+    - share
+  commands:
+    - name: core
+      path: bin/vioarr.run
+      type: executable
+    - name: alumni
+      path: bin/alumni.run
+      type: executable
+    - name: heimdall
+      path: bin/heimdall.run
+      type: executable

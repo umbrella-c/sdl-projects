@@ -1,0 +1,12 @@
+[submodule "sdl/SDL"]
+	path = sdl/SDL
+	url = ../SDL
+[submodule "sdl/SDL_ttf"]
+	path = sdl/SDL_ttf
+	url = ../SDL_ttf
+[submodule "sdl/SDL_mixer"]
+	path = sdl/SDL_mixer
+	url = ../SDL_mixer
+[submodule "sdl/SDL_image"]
+	path = sdl/SDL_image
+	url = ../SDL_image
