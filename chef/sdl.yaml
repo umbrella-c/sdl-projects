@@ -1,8 +1,10 @@
 project: 
-  summary: Open source window manager with complimentary apps
+  summary: Simple DirectMedia Layer is a cross-platform development library
   description: |
-    Open source window manager with complimentary apps. The window manager provides a window manager protocol that anyone would be able to implement, and
-    it allows for a very flexible system. Vioarr comes with a C++ application framework, which can be useful as a quick start for new applications
+    Simple DirectMedia Layer is a cross-platform development library designed to provide low level access
+    to audio, keyboard, mouse, joystick, and graphics hardware via OpenGL and Direct3D. It is used by
+    video playback software, emulators, and popular games including Valve's award winning catalog and
+    many Humble Bundle games.
   author: Philip Meulengracht
   email: the_meulengracht@hotmail.com
   version: 1.0.0
@@ -18,8 +20,6 @@ ingredients:
   channel: devel
 - name: vali/sdk-cpp
   channel: devel
-- name: vali/libzip
-  channel: devel
 - name: vali/libgracht
   channel: devel
 - name: vali/libfreetype
@@ -32,10 +32,12 @@ ingredients:
   channel: devel
 - name: vali/glm
   channel: devel
+- name: vali/libasgaard
+  channel: devel
 
 recipes:
-  - name: vioarr
-    path: /
+  - name: sdl
+    path: sdl/SDL
     toolchain: vali/clang-cc
     steps:
     - name: config
@@ -44,6 +46,83 @@ recipes:
       arguments:
         - -G
         - '"Unix Makefiles"'
+        - -DSDL_ENABLE_VIORR=ON
+        - -DSDL_SHARED_ENABLED_BY_DEFAULT=ON
+        - -DSDL_AUDIO=ON
+        - -DCMAKE_TOOLCHAIN_FILE=${{ PROJECT_PATH }}/chef/Vali.cmake
+      env:
+        CROSS: ${{ TOOLCHAIN_PREFIX }}/usr/local
+        VALI_ARCH: ${{ CHEF_TARGET_ARCHITECTURE }}
+        VALI_SDK_PATH: ${{ INGREDIENTS_PREFIX }}
+    - name: build
+      type: build
+      depends: [config]
+      system: make
+      env:
+        VALI_SDK_PATH: ${{ INGREDIENTS_PREFIX }}
+  
+  # TODO it would be nice to say 'depends: [sdl]' here
+  - name: sdl-image
+    path: sdl/SDL_image
+    toolchain: vali/clang-cc
+    steps:
+    - name: config
+      type: generate
+      system: cmake
+      arguments:
+        - -G
+        - '"Unix Makefiles"'
+        - -DSDL2_DIR=${{ INSTALL_PREFIX }}/lib/cmake/SDL2
+        - -DCMAKE_TOOLCHAIN_FILE=${{ PROJECT_PATH }}/chef/Vali.cmake
+      env:
+        CROSS: ${{ TOOLCHAIN_PREFIX }}/usr/local
+        VALI_ARCH: ${{ CHEF_TARGET_ARCHITECTURE }}
+        VALI_SDK_PATH: ${{ INGREDIENTS_PREFIX }}
+    - name: build
+      type: build
+      depends: [config]
+      system: make
+      env:
+        VALI_SDK_PATH: ${{ INGREDIENTS_PREFIX }}
+  
+  # TODO it would be nice to say 'depends: [sdl]' here
+  - name: sdl-ttf
+    path: sdl/SDL_ttf
+    toolchain: vali/clang-cc
+    steps:
+    - name: config
+      type: generate
+      system: cmake
+      arguments:
+        - -G
+        - '"Unix Makefiles"'
+        - -DSDL2_DIR=${{ INSTALL_PREFIX }}/lib/cmake/SDL2
+        - -DVENDORED_DEFAULT=OFF
+        - -DBUILD_SAMPLES=OFF
+        - -DCMAKE_TOOLCHAIN_FILE=${{ PROJECT_PATH }}/chef/Vali.cmake
+      env:
+        CROSS: ${{ TOOLCHAIN_PREFIX }}/usr/local
+        VALI_ARCH: ${{ CHEF_TARGET_ARCHITECTURE }}
+        VALI_SDK_PATH: ${{ INGREDIENTS_PREFIX }}
+    - name: build
+      type: build
+      depends: [config]
+      system: make
+      env:
+        VALI_SDK_PATH: ${{ INGREDIENTS_PREFIX }}
+
+  # TODO it would be nice to say 'depends: [sdl]' here
+  - name: sdl-mixer
+    path: sdl/SDL_mixer
+    toolchain: vali/clang-cc
+    steps:
+    - name: config
+      type: generate
+      system: cmake
+      arguments:
+        - -G
+        - '"Unix Makefiles"'
+        - -DSDL2_DIR=${{ INSTALL_PREFIX }}/lib/cmake/SDL2
         - -DCMAKE_TOOLCHAIN_FILE=${{ PROJECT_PATH }}/chef/Vali.cmake
       env:
         CROSS: ${{ TOOLCHAIN_PREFIX }}/usr/local
@@ -57,25 +136,5 @@ recipes:
         VALI_SDK_PATH: ${{ INGREDIENTS_PREFIX }}
 
 packs:
-- name: libasgaard
+- name: libsdl
   type: ingredient
-  filters:
-    - bin/*.dll
-    - include
-    - lib
-    - share
-- name: vioarr
-  type: application
-  filters:
-    - bin
-    - share
-  commands:
-    - name: core
-      path: bin/vioarr.run
-      type: executable
-    - name: alumni
-      path: bin/alumni.run
-      type: executable
-    - name: heimdall
-      path: bin/heimdall.run
-      type: executable
